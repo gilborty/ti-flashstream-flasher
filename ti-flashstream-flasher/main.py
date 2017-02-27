@@ -16,6 +16,29 @@ import smbus
 import sys
 import time
 
+# Our own modules
+import flashstream
+
+def create_i2c_bus_handle(port=1):
+    """Creates an SMBus handle to the specified i2c port
+
+    Args:
+        port (int): The i2c port to interface with Ex: port=1 is /dev/i2c-1
+    
+    Returns:
+        bus (SMBus): An SMBus object to the i2c device
+    """
+    try:
+        bus = smbus.SMBus(port)
+    except IOError:
+        # Port could'nt be opened
+        i2c_port = '/dev/i2c-' + str(port)
+        print('Could not open: {}. Aborting'.format(i2c_port))
+        sys.exit(1)
+
+    return bus
+
+
 def is_valid_image_file(file_in):
     """Checks the user provided path to the firmware image to see if it is valid
 
@@ -46,6 +69,23 @@ def is_valid_image_file(file_in):
     
     return False
 
+def parse_image(image):
+    """Parses a TI FlashStream file
+
+    Args:
+        image (str): The path to the image file
+    Returns:
+        flashstream_list (list): The parsed contents of the file, in a list
+    """
+    # Open the file
+    with open(image) as f:
+        data = f.readlines()
+    
+    # Clean, in this case strip \r \n
+    data = [x.strip() for x in data]
+
+    return data
+
 
 def main():
     """Main function, the main entry point to the script
@@ -71,10 +111,27 @@ def main():
 
     if is_valid_image_file(image_file):
         print('{} is valid, starting flashing process.'.format(image_file))
-        #flash_image(image_file, port)
+        
+        # Parse the image file for the flashstream class
+        flashstream_list = parse_image(image_file)
+
+        # Create an i2c bus object
+        bus = create_i2c_bus_handle(port)
+        # Give that to the FileStream class for parsing
+        # But first create that object
+        filestream_handler = flashstream.FlashStream(bus, flashstream_list)
+
+        # Try to flash the image
+        if filestream_handler.flash():
+            print('Flashing was successful, exiting.')
+            sys.exit(0)
+        else:
+            print('Something went wrong flashing the device. Exiting')
+            sys.exit(1)
+
     else:
         print('{} is not a valid image file. Aborting flashing process.'.format(image_file))
-        sys.exit()
+        sys.exit(1)
 
 
 if __name__ == "__main__":
