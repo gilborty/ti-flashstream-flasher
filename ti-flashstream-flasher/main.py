@@ -28,11 +28,9 @@ def is_valid_image_file(file_in):
     
     valid_extensions = [
         '.bqfs',
-        '.bq.fs',
         '.dffs',
-        '.df.fs'
+        '.fs'
     ]
-
 
     # Check if the file is, ya know, a file
     if not os.path.isfile(file_in):
@@ -43,11 +41,10 @@ def is_valid_image_file(file_in):
     filename, file_extension = os.path.splitext(file_in)
 
     for extension in valid_extensions:
-        print (extension, file_extension)
-        if not file_extension == extension:
-            return False
+        if file_extension == extension:
+            return True
     
-    return True
+    return False
 
 
 def main():
