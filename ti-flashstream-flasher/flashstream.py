@@ -9,6 +9,7 @@ Example:
 Todo:
 
 """
+import time
 
 class FlashStream(object):
     """Interface to a FlashStream list
@@ -32,6 +33,7 @@ class FlashStream(object):
         # self.dispatch[char](args)
         self.dispatch = {
             'C': self._handleComapareCommand,
+            ';': self._handleComment,
             'R': self._handleReadCommand,
             'W': self._handleWriteCommand,
             'X': self._handleWaitCommand
@@ -47,30 +49,78 @@ class FlashStream(object):
         Returns:
             boolean: True if successful, False otherwise
         """
-        # Iterate through the list
+        # Iterate through the list and handle each line
+        for data_line in self.flashstream_list:
+            # Get the command character 
+            command = self._get_command_char(data_line)
 
+            # Clean up the payload
+            payload = self._clean_payload(data_line)
 
+            # Deal with it
+            self.dispatch[command](payload)
         
-        pass
+        return True
+
+    def _clean_payload(self, data):
+        """Parses a data line to get the payload we want
+
+        Args:
+            data (str): The line to be parsed
+        Returns:
+            payload (string): The payload to be dispatched
+        """
+        payload = data.split(':')
+
+        # Handle comments correctly
+        if len(payload) > 1:
+            payload = payload[1].strip()
+        
+        return payload
+
+    def _get_command_char(self, data):
+        """Parses a line to get the first command character
+        
+        Data lines look like this:
+        [command char]: [data string]
+
+        Args:
+            data (str): The line to be parsed
+        Returns:
+            command (char): The parsed out command character
+        """
+        command_char = data[:1]
+        return command_char
+
 
     def _handleComment(self, line):
         """Handle the ; (Comment)
         """
+        print "Comment {}".format(line)
         pass
     def _handleComapareCommand(self, line):
         """Handles the C (compare): command
         """
+        #print "Handling compare command: {}".format(line)
         pass
     def _handleReadCommand(self, line):
         """Handles the R (read): command
         """
+        #print "Handling read command: {}".format(line)
         pass
     def _handleWaitCommand(self, line):
         """Handles the X (wait): command
         """
-        pass
+        print 'Waiting for {} milliseconds'.format(line)
+        
+        milliseconds = float(line) / 1000.0
+        time.sleep(milliseconds)
+
+        print 'Done waiting. '
+
     def _handleWriteCommand(self, line):
         """Handles the W (write): command
         """
+        #print "Handling write command: {}".format(line)
         pass
         
