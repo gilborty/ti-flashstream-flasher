@@ -101,9 +101,21 @@ class FlashStream(object):
 
         Example:
             C: I2CAddr RegAddr Byte0 Byte1 Byte2 ...
+
+            Read from the register, and compare the result with the list of bytes
         """
-        #print "Handling compare command: {}".format(line)
-        pass
+        # Get the i2c address, register, and number of bytes
+        i2c_addr, reg_addr, data = self._parse_payload(line)
+
+        # Read the value
+        read_value = self.bus.read_word_data(i2c_addr, reg_addr)
+
+        # Compare
+        for b in data:
+            result = (read_value) ^ b
+            
+            # Do something with the result
+
     def _handle_read_command(self, line):
         """Handles the R (read): command
 
