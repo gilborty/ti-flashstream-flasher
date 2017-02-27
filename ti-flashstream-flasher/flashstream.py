@@ -111,8 +111,11 @@ class FlashStream(object):
             R: I2CAddr RegAddr NumBytes
         """
         # Get the i2c address, register, and number of bytes
+        i2c_addr, reg_addr, data = self._parse_payload(line)
 
-        pass
+        result = self.bus.read_word_data(i2c_addr, reg_addr)
+
+
     def _handle_wait_command(self, line):
         """Handles the X (wait): command
 
@@ -136,7 +139,7 @@ class FlashStream(object):
         """
         #print "Handling write command: {}".format(line)
         i2c_addr, reg_addr, data = self._parse_payload(line)
-        print 'Writing to register {} on i2c device {}'.format(hex(reg_addr), hex(i2c_addr))
+        print 'Writing to register: {} on i2c device: {}'.format(hex(reg_addr), hex(i2c_addr))
         
         # Actually write the data
         self._write_data(i2c_addr, reg_addr, data)
@@ -185,7 +188,10 @@ class FlashStream(object):
         # Reg addr is index 1
         reg_addr = int(data_list[1], 16)
 
-        # Data is everything else:
-        data = data_list[2:]
+        # Data is everything else
+        if len(data_list) > 2:
+            data = data_list[2:]
+        else:
+            data = None
 
         return i2c_addr, reg_addr, data
