@@ -72,7 +72,6 @@ class FlashStream(object):
         # Handle comments correctly
         if len(payload) > 1:
             payload = payload[1].strip()
-        
         return payload
 
     def _get_command_char(self, data):
@@ -88,7 +87,6 @@ class FlashStream(object):
         """
         command_char = data[:1]
         return command_char
-
 
     def _handle_comment(self, line):
         """Handle the ; (Comment)
@@ -137,7 +135,32 @@ class FlashStream(object):
 
         """
         #print "Handling write command: {}".format(line)
-        pass
+        i2c_addr, reg_addr, data = self._parse_payload(line)
+        print 'Writing to register {} on i2c device {}'.format(hex(reg_addr), hex(i2c_addr))
+        
+        # Actually write the data
+        self._write_data(i2c_addr, reg_addr, data)
+
+    def _write_data(self, i2c_addr, reg_addr, data):
+        """Writes data over i2c using the SMBus object
+
+        Args:
+            i2c_addr (hex): The i2c device to use
+            reg_addr (hex): The register to write to 
+            data (list): The data to write
+
+        Returns:
+
+        """
+        if len(data) > 1:
+            # Need to write block data
+            # self.bus.write_i2c_block_data(i2c_addr, reg_addr, data)
+            print 'Writing block data: {}'.format(data)
+        else:
+            # Write byte data
+            # self.bus.write_byte_data(i2c_addr, reg_addr, data)
+            print 'Writing byte data: {}'.format(data)
+
         
     def _parse_payload(self, payload):
         """ Parse a TI FileStream line into constituent bits
@@ -152,4 +175,17 @@ class FlashStream(object):
         Returns:
             i2c_addr, reg_addr, [stuff] (tuple): The parsed payload
         """
+        # Split by spaces
+        data_list = payload.split(' ')
         
+        # i2c_addr is index 0 and is bit shifted right by 1
+        i2c_addr = data_list[0]
+        i2c_addr = int(i2c_addr, 16) >> 1
+
+        # Reg addr is index 1
+        reg_addr = int(data_list[1], 16)
+
+        # Data is everything else:
+        data = data_list[2:]
+
+        return i2c_addr, reg_addr, data
