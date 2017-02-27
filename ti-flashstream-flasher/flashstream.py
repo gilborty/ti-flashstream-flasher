@@ -29,17 +29,14 @@ class FlashStream(object):
         self.flashstream_list = flashstream_list
 
         # Setup the dispatch dict
-        # Usage:
-        # self.dispatch[char](args)
+        # Usage: self.dispatch[char](args)
         self.dispatch = {
-            'C': self._handleComapareCommand,
-            ';': self._handleComment,
-            'R': self._handleReadCommand,
-            'W': self._handleWriteCommand,
-            'X': self._handleWaitCommand
+            'C': self._handle_compare_command,
+            ';': self._handle_comment,
+            'R': self._handle_read_command,
+            'W': self._handle_write_command,
+            'X': self._handle_wait_command
         }
-
-        
     
     def flash(self):
         """ Begins the flashing process
@@ -93,34 +90,66 @@ class FlashStream(object):
         return command_char
 
 
-    def _handleComment(self, line):
+    def _handle_comment(self, line):
         """Handle the ; (Comment)
+
+        Example:
+            ;This is a comment
         """
         print "Comment {}".format(line)
         pass
-    def _handleComapareCommand(self, line):
+    def _handle_compare_command(self, line):
         """Handles the C (compare): command
+
+        Example:
+            C: I2CAddr RegAddr Byte0 Byte1 Byte2 ...
         """
         #print "Handling compare command: {}".format(line)
         pass
-    def _handleReadCommand(self, line):
+    def _handle_read_command(self, line):
         """Handles the R (read): command
+
+        Example:
+            R: I2CAddr RegAddr NumBytes
         """
-        #print "Handling read command: {}".format(line)
+        # Get the i2c address, register, and number of bytes
+
         pass
-    def _handleWaitCommand(self, line):
+    def _handle_wait_command(self, line):
         """Handles the X (wait): command
+
+        Example:
+            X: WaitInMS
         """
-        print 'Waiting for {} milliseconds'.format(line)
-        
-        milliseconds = float(line) / 1000.0
-        time.sleep(milliseconds)
+        # Convert to seconds for time.sleep()        
+        seconds = float(line) / 1000.0
 
-        print 'Done waiting. '
+        print 'Waiting for {} seconds'.format(seconds)
+        time.sleep(seconds)
 
-    def _handleWriteCommand(self, line):
+        print 'Done waiting.'
+
+    def _handle_write_command(self, line):
         """Handles the W (write): command
+
+        Example:
+            W: I2CAddr RegAddr Byte0 Byte1 Byte2 ...
+
         """
         #print "Handling write command: {}".format(line)
         pass
+        
+    def _parse_payload(self, payload):
+        """ Parse a TI FileStream line into constituent bits
+
+        Typically, the FileStream payload looks like this:
+        [I2CAddr] [RegAddr] [Stuff (n length)]
+
+        Our goal is to split it into this stuff
+
+        Args:
+            payload (string): The payload to be parsed
+        Returns:
+            i2c_addr, reg_addr, [stuff] (tuple): The parsed payload
+        """
         
