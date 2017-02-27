@@ -113,7 +113,7 @@ class FlashStream(object):
         # Compare
         for b in data:
             result = (read_value) ^ b
-            
+
             # Do something with the result
 
     def _handle_read_command(self, line):
@@ -169,11 +169,11 @@ class FlashStream(object):
         """
         if len(data) > 1:
             # Need to write block data
-            # self.bus.write_i2c_block_data(i2c_addr, reg_addr, data)
+            self.bus.write_i2c_block_data(i2c_addr, reg_addr, data)
             print 'Writing block data: {}'.format(data)
         else:
             # Write byte data
-            # self.bus.write_byte_data(i2c_addr, reg_addr, data)
+            self.bus.write_byte_data(i2c_addr, reg_addr, data)
             print 'Writing byte data: {}'.format(data)
 
         
