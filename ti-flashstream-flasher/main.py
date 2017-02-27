@@ -28,16 +28,13 @@ def create_i2c_bus_handle(port=1):
     Returns:
         bus (SMBus): An SMBus object to the i2c device
     """
-    # try:
-    #     bus = smbus.SMBus(port)
-    # except IOError:
-    #     # Port could'nt be opened
-    #     i2c_port = '/dev/i2c-' + str(port)
-    #     print('Could not open: {}. Aborting'.format(i2c_port))
-    #     sys.exit(1)
-    bus = 42
-        
-
+    try:
+        bus = smbus.SMBus(port)
+    except IOError:
+        # Port could'nt be opened
+        i2c_port = '/dev/i2c-' + str(port)
+        print('Could not open: {}. Aborting'.format(i2c_port))
+        sys.exit(1)
     return bus
 
 def is_valid_image_file(file_in):
