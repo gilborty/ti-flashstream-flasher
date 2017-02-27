@@ -90,3 +90,6 @@ ENV/
 
 # TI Data
 *.fs
+
+# Swap files
+*.swp
