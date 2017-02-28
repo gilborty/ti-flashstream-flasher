@@ -110,9 +110,14 @@ class FlashStream(object):
         # Read the value
         read_value = self.bus.read_block_data(i2c_addr, reg_addr)
 
-        # Compare
-        for idx, value in enumerate(data):
-            print(read_value[idx], value)
+        # make sure there is data 
+        if len(read_value) > 0:
+            # Compare
+            for idx, value in enumerate(data):
+                print(read_value[idx], value)
+        else:
+            print 'No values to compare. read_value: {} data: {}'.format(read_value, data)
+
 
     def _handle_read_command(self, line):
         """Handles the R (read): command
