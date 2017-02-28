@@ -4,8 +4,13 @@
 
 Reference documentation: http://www.ti.com/lit/an/slua541a/slua541a.pdf
 
+According to: https://e2e.ti.com/support/power_management/battery_management/f/180/t/432026
+
+The bq.fs file contains the full flash instructions and the df.fs file contains just the data flash
+
 Example:
 	$ python main.py [-f | --flash] [path to file.bqfs | file.ddfs]
+
 
 Todo:
 
