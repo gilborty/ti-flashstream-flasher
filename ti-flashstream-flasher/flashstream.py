@@ -104,6 +104,7 @@ class FlashStream(object):
 
             Read from the register, and compare the result with the list of bytes
         """
+        print 'Comparing'
         # Get the i2c address, register, and number of bytes
         i2c_addr, reg_addr, data = self._parse_payload(line)
 
