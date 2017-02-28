@@ -108,13 +108,11 @@ class FlashStream(object):
         i2c_addr, reg_addr, data = self._parse_payload(line)
 
         # Read the value
-        read_value = self.bus.read_word_data(i2c_addr, reg_addr)
+        read_value = self.bus.read_block_data(i2c_addr, reg_addr)
 
         # Compare
-        for b in data:
-            result = (read_value) ^ b
-
-            # Do something with the result
+        for idx, value in enumerate(data):
+            print(read_value[idx], value)
 
     def _handle_read_command(self, line):
         """Handles the R (read): command
@@ -124,9 +122,7 @@ class FlashStream(object):
         """
         # Get the i2c address, register, and number of bytes
         i2c_addr, reg_addr, data = self._parse_payload(line)
-
-        result = self.bus.read_word_data(i2c_addr, reg_addr)
-
+        result = self.bus.read_block_data(i2c_addr, reg_addr)
 
     def _handle_wait_command(self, line):
         """Handles the X (wait): command
@@ -167,14 +163,9 @@ class FlashStream(object):
         Returns:
 
         """
-        if len(data) > 1:
-            # Need to write block data
-            self.bus.write_i2c_block_data(i2c_addr, reg_addr, data)
-            print 'Writing block data: {}'.format(data)
-        else:
-            # Write byte data
-            self.bus.write_byte_data(i2c_addr, reg_addr, data)
-            print 'Writing byte data: {}'.format(data)
+        # Write to the address 
+        self.bus.write_i2c_block_data(i2c_addr, reg_addr, data)
+        print 'Wrote {}'.format(data)
 
         
     def _parse_payload(self, payload):
@@ -202,7 +193,7 @@ class FlashStream(object):
 
         # Data is everything else
         if len(data_list) > 2:
-            data = data_list[2:]
+            data = [int(x, 16) for x in data_list[2:]]
         else:
             data = None
 
