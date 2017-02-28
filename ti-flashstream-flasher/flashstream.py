@@ -170,8 +170,14 @@ class FlashStream(object):
 
         """
         # Write to the address 
-        self.bus.write_i2c_block_data(i2c_addr, reg_addr, data)
+        # SMBus is limited to 32 bytes. So, split the data
+        print 'Writing: {}'.format(data)
+        if len(data) > 32:
+            print 'Transaction is larger than SMBus can handle. Sending in chunks'
+            
         print 'Wrote {}'.format(data)
+        self.bus.write_i2c_block_data(i2c_addr, reg_addr, data)
+        
 
         
     def _parse_payload(self, payload):

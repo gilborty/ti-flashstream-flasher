@@ -11,7 +11,6 @@ The bq.fs file contains the full flash instructions and the df.fs file contains 
 Example:
 	$ python main.py [-f | --flash] [path to file.bqfs | file.ddfs]
 
-
 Todo:
 
 """
