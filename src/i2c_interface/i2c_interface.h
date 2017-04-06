@@ -6,7 +6,9 @@
 #include <linux/i2c-dev.h>
 
 #include <iostream>
+#include <stdexcept>
 #include <string>
+
 
 class I2CInterface
 {

@@ -8,7 +8,10 @@ I2CInterface::I2CInterface()
       m_errorFlag(false),
       m_slaveAddress(-1)
 {
-
+    if(openFD() < 0)
+    {
+        //throw std::runtime_error("I2C ERROR: Could not open file descriptor");
+    }
 }
 
 I2CInterface::I2CInterface(int address)
@@ -17,7 +20,10 @@ I2CInterface::I2CInterface(int address)
       m_errorFlag(false),
       m_slaveAddress(address)
 {
-    openFD();
+    if(openFD() < 0)
+    {
+        throw std::runtime_error("I2C ERROR: Could not open file descriptor");
+    }
 }
 
 I2CInterface::I2CInterface(std::string deviceFile, int address)
@@ -26,7 +32,10 @@ I2CInterface::I2CInterface(std::string deviceFile, int address)
       m_errorFlag(false),
       m_slaveAddress(address)
 {
-    
+    if(openFD() < 0)
+    {
+        throw std::runtime_error("I2C ERROR: Could not open file descriptor");
+    }
 }
 
 
