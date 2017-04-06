@@ -22,11 +22,9 @@ class I2CInterface
         int getAddress() const;
 
         int receive(unsigned char registerAddress, unsigned char* rxBuffer, int length);
-
         int send(unsigned char registerAddress, unsigned char* txBuffer, int length);
+
     private:
-        
-        
         std::string m_deviceFile;
         bool m_errorFlag;
         int m_fd;

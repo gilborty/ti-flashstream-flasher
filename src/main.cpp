@@ -1,16 +1,4 @@
-//I2C includes 
-
-
-//General includes
-#include <chrono>
-#include <errno.h>
-#include <string.h>
-#include <fstream>
-#include <iostream>
-#include <thread>
-
-
-#include "i2c/i2c_interface.h"
+#include "filestream_parser/filestream_parser.h"
 
 void wait(int milliseconds)
 {
@@ -21,8 +9,8 @@ void wait(int milliseconds)
 
 int main(int argc, const char* argv[])
 {
-    I2CInterface interface(3);
-    std::cout << "Starting ti-flashstream-flasher" << std::endl;
+    FilestreamParser parser(argv[1]);
+    parser.flash();
 
     return 0;
 }
