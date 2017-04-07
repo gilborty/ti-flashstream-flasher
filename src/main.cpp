@@ -14,7 +14,7 @@ int main(int argc, const char* argv[])
 
     std::cout << "opening i2c device: " << i2cDevice << " with slave address: " << slaveAddress << std::endl;
 
-    //I2CInterface i2cInterface(i2cDevice, slaveAddress);
+    I2CInterface i2cInterface(i2cDevice, slaveAddress);
     FilestreamParser parser(flashStreamFile);
 
     parser.flash();
