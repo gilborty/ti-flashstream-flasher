@@ -31,7 +31,54 @@ int FilestreamParser::flash()
     std::cout << "Starting TI FlashStream flasing process." << std::endl;
     std::cout << "Using data file: " << m_flashstreamFilename << std::endl;
 
+    if(validate())
+    {
+        std::string token;
+        while(std::getline(m_flashstreamBuffer, token, '\n'))
+        {
+            //Get the key
+            char key = token[0];
+            
+            switch(key)
+            {
+                case ';':
+                {
+                    handleComment(token);
+                    break;
+                }
+                case 'C':
+                {
+                    handleCompare(token);
+                    break;
+                }
+                case 'W':
+                {
+                    handleWrite(token);
+                    break;
+                }
+                case 'X':
+                {
+                    handleWait(token);
+                    break;
+                }
+                default:
+                {
+                    std::cout << "Error parsing file. Bad line: " << token << std::endl;
+                    break;
+                }
+            }
+        }
+    }
+
+}
+
+bool FilestreamParser::validate()
+{
+    //Try to parse the file, return false if could not validate
+    std::cout << "Validating..." << std::endl;
+
     std::string token;
+    bool isValid = true;
     while(std::getline(m_flashstreamBuffer, token, '\n'))
     {
         //Get the key
@@ -41,31 +88,30 @@ int FilestreamParser::flash()
         {
             case ';':
             {
-                handleComment(token);
                 break;
             }
             case 'C':
             {
-                handleCompare(token);
                 break;
             }
             case 'W':
             {
-                handleWrite(token);
                 break;
             }
             case 'X':
             {
-                handleWait(token);
                 break;
             }
             default:
             {
                 std::cout << "Error parsing file. Bad line: " << token << std::endl;
+                isValid = false; 
                 break;
             }
         }
     }
+
+    return isValid;
 }
 
 void FilestreamParser::handleComment(const std::string& commentIn)
