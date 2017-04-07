@@ -77,7 +77,33 @@ void FilestreamParser::handleComment(const std::string& commentIn)
 void FilestreamParser::handleCompare(const std::string& compareLine)
 {
     //C: i2cAddr RegAddr Byte0 Byte1 Byte2
-    std::cout << "Comparing" << std::endl;
+    auto split = splitString(compareLine, ' ');
+
+    unsigned char slaveAddress = getHexFromString(split[1]);
+    unsigned char regAddress = getHexFromString(split[2]);
+
+    auto payload = getPayload(split, 3);
+
+    unsigned char buffer[payload.size()];
+
+    if(slaveAddress != m_i2cInterface.getAddress())
+    {
+        m_i2cInterface.setAddress(slaveAddress);
+    }
+
+    if(m_i2cInterface.receive(regAddress, buffer, payload.size()) < 0)
+    {
+        throw std::runtime_error("Error writing to device");
+    } 
+
+    //Compare
+    for(size_t i = 0; i < payload.size(); ++i)
+    {
+        if(buffer[i] != payload.at(i))
+        {
+            throw std::runtime_error("Failed compare");
+        }
+    }
 }
 
 void FilestreamParser::handleWrite(const std::string& writeLine)
@@ -100,7 +126,7 @@ void FilestreamParser::handleWrite(const std::string& writeLine)
     if(m_i2cInterface.send(regAddress, &payload.front(), payload.size()) < 0)
     {
         throw std::runtime_error("Error writing to device");
-    };  
+    }  
 }
 
 void FilestreamParser::handleWait(const std::string& waitLine)
