@@ -84,11 +84,23 @@ void FilestreamParser::handleWrite(const std::string& writeLine)
 {
     //W: I2CAddr RegAddr Byte0 Byte1 Byte2…
     auto split = splitString(writeLine, ' ');
-    int slaveAddress = std::stoi(split[1]);
-    //int regAddress = std::stoi(split[2]);
 
-    std::cout << "Writing to device address: " << slaveAddress << " to reg address: " << std::endl;
-    
+    unsigned char slaveAddress = getHexFromString(split[1]);
+    unsigned char regAddress = getHexFromString(split[2]);
+
+    auto payload = getPayload(split, 3);
+
+    std::cout << "Writing to device address: " << slaveAddress << " with reg address: " << regAddress << std::endl;
+
+    if(slaveAddress != m_i2cInterface.getAddress())
+    {
+        m_i2cInterface.setAddress(slaveAddress);
+    }
+
+    if(m_i2cInterface.send(regAddress, &payload.front(), payload.size()) < 0)
+    {
+        throw std::runtime_error("Error writing to device");
+    };  
 }
 
 void FilestreamParser::handleWait(const std::string& waitLine)
@@ -112,4 +124,23 @@ void FilestreamParser::wait(int milliseconds)
 {
     //Sleeps this thread for the specified milliseconds
     std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+}
+
+unsigned char FilestreamParser::getHexFromString(const std::string& stringIn)
+{
+    unsigned char value = std::stoul(stringIn, nullptr, 16);
+    return value;
+}
+
+std::vector<unsigned char> FilestreamParser::getPayload(std::vector<std::string>& lineIn, int pruneLength)
+{
+    lineIn.erase(lineIn.begin(), lineIn.begin() + pruneLength);
+
+    std::vector<unsigned char> payload;
+    for(auto& elem : lineIn)
+    {
+        payload.push_back(getHexFromString(elem));
+    }
+    
+    return payload;
 }

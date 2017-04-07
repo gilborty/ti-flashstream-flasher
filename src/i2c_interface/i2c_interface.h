@@ -20,8 +20,8 @@ class I2CInterface
 
         ~I2CInterface();
 
-        int setAddress(int address);
-        int getAddress() const;
+        int setAddress(unsigned char address);
+        unsigned char getAddress() const;
 
         int receive(unsigned char registerAddress, unsigned char* rxBuffer, int length);
         int send(unsigned char registerAddress, unsigned char* txBuffer, int length);
@@ -30,7 +30,7 @@ class I2CInterface
         std::string m_deviceFile;
         bool m_errorFlag;
         int m_fd;
-        int m_slaveAddress;
+        unsigned char m_slaveAddress;
         
         static const std::string m_defaultDeviceFile;
         

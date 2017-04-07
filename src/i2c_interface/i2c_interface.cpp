@@ -92,13 +92,13 @@ int I2CInterface::errorMessage(const std::string& message)
     return -1;
 }
 
-int I2CInterface::setAddress(int address)
+int I2CInterface::setAddress(unsigned char address)
 {
     m_slaveAddress = address;
     return openFD();
 }
 
-int I2CInterface::getAddress() const 
+unsigned char I2CInterface::getAddress() const 
 {
     return m_slaveAddress;
 }

@@ -17,6 +17,7 @@ class FilestreamParser
         FilestreamParser(const std::string& flashstreamFile, const std::string& i2cDevice, int slaveAddress);
 
         int flash();
+
     private:
 
         std::string m_flashstreamFilename;
@@ -28,6 +29,8 @@ class FilestreamParser
         void handleWait(const std::string& waitLine);
         void handleWrite(const std::string& writeLine);
 
+        unsigned char getHexFromString(const std::string& stringIn);
+
         template<typename Out>
         void split(const std::string &s, char delim, Out result) {
             std::stringstream ss;
@@ -38,6 +41,7 @@ class FilestreamParser
             }
         }
         std::vector<std::string> splitString(const std::string& s, char delim);
+
+        std::vector<unsigned char> getPayload(std::vector<std::string>& lineIn, int pruneLength);
         void wait(int milliseconds);
-   
 };
