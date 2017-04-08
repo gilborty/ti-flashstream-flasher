@@ -77,9 +77,12 @@ bool FilestreamParser::validate()
     //Try to parse the file, return false if could not validate
     std::cout << "Validating..." << std::endl;
 
+    std::stringstream tmpBuffer;
+    tmpBuffer << m_flashstreamBuffer.str();
+
     std::string token;
     bool isValid = true;
-    while(std::getline(m_flashstreamBuffer, token, '\n'))
+    while(std::getline(tmpBuffer, token, '\n'))
     {
         //Get the key
         char key = token[0];
@@ -125,7 +128,8 @@ void FilestreamParser::handleCompare(const std::string& compareLine)
     //C: i2cAddr RegAddr Byte0 Byte1 Byte2
     auto split = splitString(compareLine, ' ');
 
-    unsigned char slaveAddress = getHexFromString(split[1]);
+    //Bit shift the address
+    unsigned char slaveAddress = (getHexFromString(split[1]) >> 1);
     unsigned char regAddress = getHexFromString(split[2]);
 
     auto payload = getPayload(split, 3);
@@ -145,6 +149,7 @@ void FilestreamParser::handleCompare(const std::string& compareLine)
     //Compare
     for(size_t i = 0; i < payload.size(); ++i)
     {
+        std::cout << static_cast<int>(buffer[i]) << "\t" << static_cast<int>(payload.at(i)) << std::endl;
         if(buffer[i] != payload.at(i))
         {
             throw std::runtime_error("Failed compare");
@@ -157,15 +162,18 @@ void FilestreamParser::handleWrite(const std::string& writeLine)
     //W: I2CAddr RegAddr Byte0 Byte1 Byte2…
     auto split = splitString(writeLine, ' ');
 
-    unsigned char slaveAddress = getHexFromString(split[1]);
+    unsigned char slaveAddress = (getHexFromString(split[1]));
+    std::cout << "Before: " << (int)slaveAddress << std::endl;
+    std::cout << "After: " << (int)(slaveAddress >> 1) << std::endl;
     unsigned char regAddress = getHexFromString(split[2]);
 
     auto payload = getPayload(split, 3);
 
-    std::cout << "Writing to device address: " << slaveAddress << " with reg address: " << regAddress << std::endl;
+    std::cout << "Writing to device address: " << (int)slaveAddress << " with reg address: " << (int)regAddress << std::endl;
 
     if(slaveAddress != m_i2cInterface.getAddress())
     {
+        //TODO: Check the ret val of this 
         m_i2cInterface.setAddress(slaveAddress);
     }
 

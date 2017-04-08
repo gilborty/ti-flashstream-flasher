@@ -35,7 +35,6 @@ class FilestreamParser
         std::vector<std::string> splitString(const std::string& s, char delim);
         bool validate();
         void wait(int milliseconds);
-        
         template<typename Out>
         void split(const std::string &s, char delim, Out result) {
             std::stringstream ss;

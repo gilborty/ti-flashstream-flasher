@@ -14,7 +14,7 @@ I2CInterface::I2CInterface()
     }
 }
 
-I2CInterface::I2CInterface(int address)
+I2CInterface::I2CInterface(unsigned char address)
     : m_deviceFile(m_defaultDeviceFile),
       m_fd(0),
       m_errorFlag(false),
@@ -38,7 +38,6 @@ I2CInterface::I2CInterface(std::string deviceFile, int address)
     }
 }
 
-
 I2CInterface::~I2CInterface()
 {
     closeFD();
@@ -54,6 +53,9 @@ int I2CInterface::openFD()
         closeFD();
         m_fd = 0;
     }
+
+    //Bit shift slave address
+    m_slaveAddress = (m_slaveAddress >> 1);
 
     if(m_slaveAddress == -1)
     {
@@ -166,8 +168,15 @@ int I2CInterface::send(unsigned char registerAddress, unsigned char* txBuffer, i
 
 	m_errorFlag = false;	
 
+    //TODO: Get the actual ioctl error code reported here
+    //http://stackoverflow.com/questions/14968238/ioctl-call-and-checking-return-value
+    for(size_t i = 0; i < length + 1; ++i)
+    {
+        std::cout <<"data[" << i << "]" << "\t" << (int)data[i] << std::endl;
+    }
 	if(write(m_fd, data, length+1) != length+1)
     {
+        printf("ioctl failed and returned errno %s \n",strerror(errno));
         return errorMessage("i2c write error!");
     }
 

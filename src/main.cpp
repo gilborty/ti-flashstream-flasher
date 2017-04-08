@@ -1,4 +1,7 @@
 #include "filestream_parser/filestream_parser.h"
+#include <stdio.h>
+#include <stdlib.h>
+
 
 int main(int argc, const char* argv[])
 {
@@ -9,13 +12,16 @@ int main(int argc, const char* argv[])
     }
 
     std::string i2cDevice = argv[1];
-    int slaveAddress = std::stoi(argv[2]);
+
+    std::string slaveAddress = argv[2];
+    unsigned char shiftedAddress = (std::stoul(slaveAddress, nullptr, 16) >> 1);
+
     std::string flashStreamFile = argv[3];
 
-    std::cout << "opening i2c device: " << i2cDevice << " with slave address: " << slaveAddress << std::endl;
-
-    I2CInterface i2cInterface(i2cDevice, slaveAddress);
-    FilestreamParser parser(flashStreamFile);
+    std::cout << "opening i2c device: " << i2cDevice << " with slave address: " << (int)shiftedAddress << std::endl;
+    
+    I2CInterface i2cInterface(i2cDevice, shiftedAddress);
+    FilestreamParser parser(flashStreamFile, i2cInterface);
 
     parser.flash();
 

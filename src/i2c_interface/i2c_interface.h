@@ -8,6 +8,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <sstream>
+#include <cstring>
 
 
 class I2CInterface
@@ -15,7 +17,7 @@ class I2CInterface
     public:
 
         I2CInterface();
-        I2CInterface(int address);
+        I2CInterface(unsigned char address);
         I2CInterface(std::string deviceFile, int address);
 
         ~I2CInterface();
