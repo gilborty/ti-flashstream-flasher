@@ -214,12 +214,13 @@ I2CInterface::RET_CODE FilestreamParser::handleWrite(const std::string& writeLin
     }
 
     //Iterate throught the payload
+    //See Section 1.3: http://www.ti.com/lit/an/slua541a/slua541a.pdf
     for(auto& data : payload)
     {
         std::cout << "Reg: " << (int)regAddress << std::endl;
         std::cout << "Data: " << (int)data << std::endl;
        
-        I2CInterface::RET_CODE retCode = m_i2cInterface.send(regAddress, &payload.front(), payload.size());
+        I2CInterface::RET_CODE retCode = m_i2cInterface.sendByte(regAddress, data);
         if(retCode != I2CInterface::RET_CODE::SUCCESS)
         {
             std::cout << "Failed handle write because of error: " << static_cast<int>(retCode) << std::endl;

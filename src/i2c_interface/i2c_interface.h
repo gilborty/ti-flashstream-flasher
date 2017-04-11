@@ -41,6 +41,7 @@ class I2CInterface
 
         I2CInterface::RET_CODE receive(uint8_t registerAddress, uint8_t* rxBuffer, int length);
         I2CInterface::RET_CODE send(uint8_t registerAddress, uint8_t* txBuffer, int length);
+        I2CInterface::RET_CODE sendByte(uint8_t registerAddress, uint8_t data);
 
     private:
         std::string m_deviceFile;
