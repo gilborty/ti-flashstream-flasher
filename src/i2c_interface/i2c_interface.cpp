@@ -1,23 +1,23 @@
 #include "i2c_interface.h"
 
-I2CInterface::I2CInterface(std::string deviceFile, int slaveAddress)
+I2CInterface::I2CInterface(const std::string& deviceFile, uint8_t slaveAddress)
     : m_deviceFile(deviceFile),
-      m_slaveAddress(address),
+      m_slaveAddress(slaveAddress),
       m_fileDescriptor(0)
 {
 }
 
 I2CInterface::~I2CInterface()
 {
-    closeFD();
+    closeFileDescriptor();
 }
 
-int I2CInterface::init()
+I2CInterface::RET_CODE I2CInterface::init()
 {
     return openFileDescriptor();
 }
 
-int I2CInterface::openFileDescriptor()
+I2CInterface::RET_CODE I2CInterface::openFileDescriptor()
 {
     if(m_fileDescriptor)
     {
@@ -50,7 +50,7 @@ void I2CInterface::closeFileDescriptor()
     }
 }
 
-int I2CInterface::setSlaveAddress(const uint8_t slaveAddress)
+I2CInterface::RET_CODE I2CInterface::setSlaveAddress(const uint8_t slaveAddress)
 {
     m_slaveAddress = slaveAddress;
     return openFileDescriptor();
@@ -61,7 +61,7 @@ uint8_t I2CInterface::getSlaveAddress() const
     return m_slaveAddress;
 }
 
-int I2CInterface::send(uint8_t registerAddress, uint8_t* txBuffer, int length)
+I2CInterface::RET_CODE I2CInterface::send(uint8_t registerAddress, uint8_t* txBuffer, int length)
 {
     //check for a null buffer pointer
     if(txBuffer == nullptr)
@@ -98,7 +98,7 @@ int I2CInterface::send(uint8_t registerAddress, uint8_t* txBuffer, int length)
     return RET_CODE::SUCCESS;
 }
 
-int I2CInterface::receive(uint8_t registerAddress, uint8_t* rxBuffer, int length)
+I2CInterface::RET_CODE I2CInterface::receive(uint8_t registerAddress, uint8_t* rxBuffer, int length)
 {
     if(read(m_fileDescriptor, rxBuffer, length) != length)
     {

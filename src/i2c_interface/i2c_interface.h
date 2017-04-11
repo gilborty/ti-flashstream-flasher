@@ -25,21 +25,22 @@ class I2CInterface
             NULL_TRANSMIT_BUFFER = 3,
             INVALID_TRANSMIT_BUFFER_LENGTH = 4,
             FAILED_I2C_WRITE = 5,
-            FAILED_I2C_READ = 6
+            FAILED_I2C_READ = 6,
+            FAILED_VALIDATE = 7
         };
 
-        I2CInterface(std::string deviceFile, uint8_t slaveAddress);
+        I2CInterface(const std::string& deviceFile, uint8_t slaveAddress);
         ~I2CInterface();
 
-        int init();
-        int openFileDescriptor();
+        I2CInterface::RET_CODE init();
+        I2CInterface::RET_CODE  openFileDescriptor();
         void closeFileDescriptor();
 
-        int setSlaveAddress(uint8_t slaveAddress);
+        I2CInterface::RET_CODE setSlaveAddress(uint8_t slaveAddress);
         uint8_t getSlaveAddress() const;
 
-        int receive(uint8_t registerAddress, uint8_t* rxBuffer, int length);
-        int send(uint8_t registerAddress, uint8_t* txBuffer, int length);
+        I2CInterface::RET_CODE receive(uint8_t registerAddress, uint8_t* rxBuffer, int length);
+        I2CInterface::RET_CODE send(uint8_t registerAddress, uint8_t* txBuffer, int length);
 
     private:
         std::string m_deviceFile;

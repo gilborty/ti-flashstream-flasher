@@ -12,12 +12,12 @@
 class FilestreamParser
 {
     public:
-        FilestreamParser(const std::string& flashstreamFile, I2CInterface interfaceIn);
+        FilestreamParser(const std::string& flashstreamFile, const std::string& deviceFile, const uint8_t slaveAddress);
 
-        int flash();
+        I2CInterface::RET_CODE init();
+        I2CInterface::RET_CODE flash();
 
     private:
-
         std::string m_flashstreamFilename;
         std::stringstream m_flashstreamBuffer;
         I2CInterface m_i2cInterface;
@@ -28,11 +28,12 @@ class FilestreamParser
         void handleComment(const std::string& commentIn);
         void handleCompare(const std::string& compareLine);
         void handleWait(const std::string& waitLine);
-        void handleWrite(const std::string& writeLine);
+        I2CInterface::RET_CODE handleWrite(const std::string& writeLine);
 
         std::vector<std::string> splitString(const std::string& s, char delim);
         bool validate();
         void wait(int milliseconds);
+
         template<typename Out>
         void split(const std::string &s, char delim, Out result) {
             std::stringstream ss;

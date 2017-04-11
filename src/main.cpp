@@ -11,27 +11,36 @@ int main(int argc, const char* argv[])
         return -1;
     }
 
+    //Get the i2c device file (i.e.: /dev/i2c-2)
     std::string i2cDevice = argv[1];
-    uint8_t slaveAddress = argv[2];
+
+    //slave address we will start writing to (i.e.: 55)
+    std::string addr = argv[2];
+    uint8_t slaveAddress = std::stoul(addr, nullptr, 16);
+
+    //The path to the ti flashstream file
     std::string flashStreamFile = argv[3];
 
-    //Init i2c interface
-    I2CInterface i2cInterface(i2cDevice, slaveAddress);
+    //construct a parser and flasher
+    FilestreamParser parser(flashStreamFile, i2cDevice, slaveAddress);
     
-    int returnCode = i2cInterface.init();
-    if(returnCode != I2CInterface::RET_CODE::SUCCESS)
+    //Try to init
+    I2CInterface::RET_CODE retCode = parser.init();
+    if(retCode != I2CInterface::RET_CODE::SUCCESS)
     {
-        std::cout << "Failed i2c init with return code: " << returnCode << std::endl;
+        std::cout << "Failed init with return code: " << static_cast<int>(retCode) << std::endl;
         return -1;
     }
 
+    //Try to flash
+    retCode = parser.flash();
+    if(retCode != I2CInterface::RET_CODE::SUCCESS)
+    {
+        std::cout << "Failed flashing with return code: " << static_cast<int>(retCode) << std::endl;
+        return -1;
+    }
 
-    //Init filestream parser
-
-
-
-
-
+    std::cout << "Flashing successful." << std::endl;
     return 0;
 }
 
