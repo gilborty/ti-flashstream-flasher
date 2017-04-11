@@ -105,7 +105,7 @@ I2CInterface::RET_CODE I2CInterface::sendByte(uint8_t registerAddress, uint8_t d
     buffer[1] = data;
 
     //Write the data
-    if(write(m_fileDescriptor, buffer, length) != length)
+    if(write(m_fileDescriptor, buffer, 2) != 2)
     {
         std::cout << "i2c error: " << std::strerror(errno) << std::endl;
         return RET_CODE::FAILED_I2C_WRITE;
