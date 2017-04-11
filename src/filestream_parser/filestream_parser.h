@@ -12,9 +12,7 @@
 class FilestreamParser
 {
     public:
-        FilestreamParser(const std::string& flashstreamFile);
         FilestreamParser(const std::string& flashstreamFile, I2CInterface interfaceIn);
-        FilestreamParser(const std::string& flashstreamFile, const std::string& i2cDevice, int slaveAddress);
 
         int flash();
 

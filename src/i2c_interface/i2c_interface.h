@@ -10,33 +10,39 @@
 #include <string>
 #include <sstream>
 #include <cstring>
+#include <cerrno>
 
 
 class I2CInterface
 {
     public:
 
-        I2CInterface();
-        I2CInterface(unsigned char address);
-        I2CInterface(std::string deviceFile, int address);
+        enum class RET_CODE : int
+        {
+            SUCCESS = 0,
+            FAILED_OPEN_FILE_DESCRIPTOR = 1,
+            FAILED_INIT_INPUT_OUTPUT_CONTROL = 2,
+            NULL_TRANSMIT_BUFFER = 3,
+            INVALID_TRANSMIT_BUFFER_LENGTH = 4,
+            FAILED_I2C_WRITE = 5,
+            FAILED_I2C_READ = 6
+        };
 
+        I2CInterface(std::string deviceFile, uint8_t slaveAddress);
         ~I2CInterface();
 
-        int setAddress(unsigned char address);
-        unsigned char getAddress() const;
+        int init();
+        int openFileDescriptor();
+        void closeFileDescriptor();
 
-        int receive(unsigned char registerAddress, unsigned char* rxBuffer, int length);
-        int send(unsigned char registerAddress, unsigned char* txBuffer, int length);
+        int setSlaveAddress(uint8_t slaveAddress);
+        uint8_t getSlaveAddress() const;
+
+        int receive(uint8_t registerAddress, uint8_t* rxBuffer, int length);
+        int send(uint8_t registerAddress, uint8_t* txBuffer, int length);
 
     private:
         std::string m_deviceFile;
-        bool m_errorFlag;
-        int m_fd;
-        unsigned char m_slaveAddress;
-        
-        static const std::string m_defaultDeviceFile;
-        
-        int errorMessage(const std::string& message);
-        int openFD();
-        void closeFD();
+        uint8_t m_slaveAddress;
+        int m_fileDescriptor;
 };

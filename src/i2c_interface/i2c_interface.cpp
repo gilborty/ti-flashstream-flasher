@@ -1,41 +1,10 @@
 #include "i2c_interface.h"
 
-const std::string I2CInterface::m_defaultDeviceFile = "/dev/i2c-1";
-
-I2CInterface::I2CInterface()
-    : m_deviceFile(m_defaultDeviceFile),
-      m_fd(0),
-      m_errorFlag(false),
-      m_slaveAddress(-1)
-{
-    if(openFD() < 0)
-    {
-        //throw std::runtime_error("I2C ERROR: Could not open file descriptor");
-    }
-}
-
-I2CInterface::I2CInterface(unsigned char address)
-    : m_deviceFile(m_defaultDeviceFile),
-      m_fd(0),
-      m_errorFlag(false),
-      m_slaveAddress(address)
-{
-    if(openFD() < 0)
-    {
-        throw std::runtime_error("I2C ERROR: Could not open file descriptor");
-    }
-}
-
-I2CInterface::I2CInterface(std::string deviceFile, int address)
+I2CInterface::I2CInterface(std::string deviceFile, int slaveAddress)
     : m_deviceFile(deviceFile),
-      m_fd(0),
-      m_errorFlag(false),
-      m_slaveAddress(address)
+      m_slaveAddress(address),
+      m_fileDescriptor(0)
 {
-    if(openFD() < 0)
-    {
-        throw std::runtime_error("I2C ERROR: Could not open file descriptor");
-    }
 }
 
 I2CInterface::~I2CInterface()
@@ -43,142 +12,99 @@ I2CInterface::~I2CInterface()
     closeFD();
 }
 
-
-int I2CInterface::openFD()
+int I2CInterface::init()
 {
-    m_errorFlag = false;
-
-    if(m_fd)
-    {
-        closeFD();
-        m_fd = 0;
-    }
-
-    //Bit shift slave address
-    m_slaveAddress = (m_slaveAddress >> 1);
-
-    if(m_slaveAddress == -1)
-    {
-        return errorMessage("ERROR: Slave address is not set");
-    }
-
-    if( ( m_fd = open( m_deviceFile.c_str(), O_RDWR ) ) < 0 )
-    {
-        return errorMessage("ERROR opening: " + m_deviceFile);
-    }
-
-    if( ioctl(m_fd, I2C_SLAVE, m_slaveAddress) < 0)
-    {
-        return errorMessage("ERROR: input/output control ");
-    }
-
-    return 0;
+    return openFileDescriptor();
 }
 
-void I2CInterface::closeFD()
+int I2CInterface::openFileDescriptor()
 {
-    if(m_fd)
+    if(m_fileDescriptor)
     {
-        close(m_fd);
-        m_fd = 0;
+        closeFileDescriptor();
+    }
+
+    //Try to open the file descriptor
+    m_fileDescriptor = open(m_deviceFile.c_str(), O_RDWR);
+    if(m_fileDescriptor < 0)
+    {
+        std::cout << "i2c error: " << std::strerror(errno) << std::endl;
+        return RET_CODE::FAILED_OPEN_FILE_DESCRIPTOR;
+    }
+
+    //Init input output control
+    if(ioctl(m_fileDescriptor, I2C_SLAVE, m_slaveAddress) < 0)
+    {
+        std::cout << "i2c error: " << std::strerror(errno) << std::endl;
+        return RET_CODE::FAILED_INIT_INPUT_OUTPUT_CONTROL;
+    }
+    return RET_CODE::SUCCESS;
+}
+
+void I2CInterface::closeFileDescriptor()
+{
+    if(m_fileDescriptor)
+    {
+        close(m_fileDescriptor);
+        m_fileDescriptor = 0;
     }
 }
 
-int I2CInterface::errorMessage(const std::string& message)
+int I2CInterface::setSlaveAddress(const uint8_t slaveAddress)
 {
-    m_errorFlag = true;
-    
-    std::cout << message << std::endl;
-
-    closeFD();
-    return -1;
+    m_slaveAddress = slaveAddress;
+    return openFileDescriptor();
 }
 
-int I2CInterface::setAddress(unsigned char address)
-{
-    m_slaveAddress = address;
-    return openFD();
-}
-
-unsigned char I2CInterface::getAddress() const 
+uint8_t I2CInterface::getSlaveAddress() const
 {
     return m_slaveAddress;
 }
 
-int I2CInterface::receive(unsigned char registerAddress, unsigned char* rxBuffer, int length)
+int I2CInterface::send(uint8_t registerAddress, uint8_t* txBuffer, int length)
 {
-    if(rxBuffer == 0)
+    //check for a null buffer pointer
+    if(txBuffer == nullptr)
     {
-        return errorMessage("Recieve function receieved a null rx buffer pointer");
+        std::cout << "i2c error: received null transmit buffer." << std::endl;
+        return RET_CODE::NULL_TRANSMIT_BUFFER;
     }
 
+    //Check for an invalid length
     if(length < 1)
     {
-        return errorMessage("Recieve function receieved an invalid buffer length");
+        std::cout << "i2c error: invalid send buffer length" << std::endl;
+        return RET_CODE::INVALID_TRANSMIT_BUFFER_LENGTH;
     }
 
-    if(!m_fd)
+    //Create the buffer
+    //Payload length plus zeroth element for register
+    uint8_t buffer[length + 1];
+    buffer[0] = registerAddress;
+
+    //Pack the buffer
+    for(size_t i = 0; i < length; ++i)
     {
-        if(openFD() == -1)
-        {
-            return errorMessage("ERROR: Could not open fd");
-        }
+        buffer[i+1] = txBuffer[i];
     }
 
-    m_errorFlag = false;
-
-    if( write(m_fd, &registerAddress, 1) != 1)
+    //Write the data
+    if(write(m_fileDescriptor, buffer, length) != length)
     {
-        return errorMessage("ERROR: i2c write error");
+        std::cout << "i2c error: " << std::strerror(errno) << std::endl;
+        return RET_CODE::FAILED_I2C_WRITE;
     }
 
-    if( read(m_fd, rxBuffer, length) != length )
-    {
-        return errorMessage("ERROR: i2c read error!");
-    }
-    return 1;
+    return RET_CODE::SUCCESS;
 }
 
-int I2CInterface::send(unsigned char registerAddress, unsigned char* txBuffer, int length)
+int I2CInterface::receive(uint8_t registerAddress, uint8_t* rxBuffer, int length)
 {
-	unsigned char data[length+1];
-	data[0] = registerAddress;
-	
-	for ( size_t i = 0; i < length ; ++i ) 
+    if(read(m_fileDescriptor, rxBuffer, length) != length)
     {
-		data[i+1] = txBuffer[i];
-	}
-
-	if (txBuffer == 0)
-    {
-        return errorMessage("Null tx buffer pointer!");
-    }
-	if (length < 1)
-    {
-        return errorMessage("Send method received an invalid buffer length.");
-    }
-		
-    if(!m_fd)
-    {
-        if(openFD() == -1)
-        {
-            return errorMessage("ERROR: Could not open fd");
-        }
+        std::cout << "i2c error: " << std::strerror(errno) << std::endl;
+        return RET_CODE::FAILED_I2C_READ;
     }
 
-	m_errorFlag = false;	
-
-    //TODO: Get the actual ioctl error code reported here
-    //http://stackoverflow.com/questions/14968238/ioctl-call-and-checking-return-value
-    for(size_t i = 0; i < length + 1; ++i)
-    {
-        std::cout <<"data[" << i << "]" << "\t" << (int)data[i] << std::endl;
-    }
-	if(write(m_fd, data, length+1) != length+1)
-    {
-        printf("ioctl failed and returned errno %s \n",strerror(errno));
-        return errorMessage("i2c write error!");
-    }
-
-	return 1;
+    return RET_CODE::SUCCESS;
 }

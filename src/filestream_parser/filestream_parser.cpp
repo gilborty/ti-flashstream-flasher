@@ -31,7 +31,7 @@ int FilestreamParser::flash()
     std::cout << "Starting TI FlashStream flasing process." << std::endl;
     std::cout << "Using data file: " << m_flashstreamFilename << std::endl;
 
-    if(validate())
+    if( validate() )
     {
         std::string token;
         while(std::getline(m_flashstreamBuffer, token, '\n'))
