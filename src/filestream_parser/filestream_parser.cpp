@@ -22,8 +22,6 @@ I2CInterface::RET_CODE FilestreamParser::init()
     return retCode;
 }
 
-
-
 I2CInterface::RET_CODE FilestreamParser::flash()
 {
     std::cout << "Starting TI FlashStream flasing process." << std::endl;

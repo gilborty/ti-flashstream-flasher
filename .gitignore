@@ -93,3 +93,6 @@ ENV/
 
 # Swap files
 *.swp
+
+# Data dir
+data/
