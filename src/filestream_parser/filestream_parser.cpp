@@ -199,7 +199,7 @@ I2CInterface::RET_CODE FilestreamParser::handleWrite(const std::string& writeLin
         std::cout << "Failed handle write because of error: " << static_cast<int>(retCode) << std::endl;
         return retCode;
     }
-    return I2CInterface::RET_CODE::FAILED_I2C_WRITE;
+    return I2CInterface::RET_CODE::SUCCESS;
 }
 
 void FilestreamParser::handleWait(const std::string& waitLine)
