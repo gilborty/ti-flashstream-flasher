@@ -177,7 +177,7 @@ I2CInterface::RET_CODE FilestreamParser::handleCompare(const std::string& compar
     //Compare
     for(size_t i = 1; i < payload.size(); ++i)
     {
-        std::cout << static_cast<int>(buffer[i]) << "\t" << static_cast<int>(payload.at(i)) << std::endl;
+        std::cout << "Comparing: " << static_cast<int>(buffer[i]) << "\t" << static_cast<int>(payload.at(i)) << std::endl;
         if(buffer[i] != payload.at(i))
         {
             throw std::runtime_error("Failed compare");
@@ -218,21 +218,16 @@ I2CInterface::RET_CODE FilestreamParser::handleWrite(const std::string& writeLin
     {
         std::cout << "Reg: " << (int)regAddress << std::endl;
         std::cout << "Data: " << (int)data << std::endl;
+       
+        I2CInterface::RET_CODE retCode = m_i2cInterface.send(regAddress, &payload.front(), payload.size());
+        if(retCode != I2CInterface::RET_CODE::SUCCESS)
+        {
+            std::cout << "Failed handle write because of error: " << static_cast<int>(retCode) << std::endl;
+            return retCode;
+        }
         ++regAddress;
-        // I2CInterface::RET_CODE retCode = m_i2cInterface.send(regAddress, &payload.front(), payload.size());
-        // if(retCode != I2CInterface::RET_CODE::SUCCESS)
-        // {
-        //     std::cout << "Failed handle write because of error: " << static_cast<int>(retCode) << std::endl;
-        //     return retCode;
-        // }
     }
 
-    // I2CInterface::RET_CODE retCode = m_i2cInterface.send(regAddress, &payload.front(), payload.size());
-    // if(retCode != I2CInterface::RET_CODE::SUCCESS)
-    // {
-    //     std::cout << "Failed handle write because of error: " << static_cast<int>(retCode) << std::endl;
-    //     return retCode;
-    // }
     return I2CInterface::RET_CODE::SUCCESS;
 }
 
