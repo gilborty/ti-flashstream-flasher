@@ -175,7 +175,7 @@ I2CInterface::RET_CODE FilestreamParser::handleCompare(const std::string& compar
     }
 
     //Compare
-    for(size_t i = 0; i < payload.size(); ++i)
+    for(size_t i = 1; i < payload.size(); ++i)
     {
         std::cout << static_cast<int>(buffer[i]) << "\t" << static_cast<int>(payload.at(i)) << std::endl;
         if(buffer[i] != payload.at(i))
@@ -213,12 +213,26 @@ I2CInterface::RET_CODE FilestreamParser::handleWrite(const std::string& writeLin
         }
     }
 
-    I2CInterface::RET_CODE retCode = m_i2cInterface.send(regAddress, &payload.front(), payload.size());
-    if(retCode != I2CInterface::RET_CODE::SUCCESS)
+    //Iterate throught the payload
+    for(auto& data : payload)
     {
-        std::cout << "Failed handle write because of error: " << static_cast<int>(retCode) << std::endl;
-        return retCode;
+        std::cout << "Reg: " << (int)regAddress << std::endl;
+        std::cout << "Data: " << (int)data << std::endl;
+        ++regAddress;
+        // I2CInterface::RET_CODE retCode = m_i2cInterface.send(regAddress, &payload.front(), payload.size());
+        // if(retCode != I2CInterface::RET_CODE::SUCCESS)
+        // {
+        //     std::cout << "Failed handle write because of error: " << static_cast<int>(retCode) << std::endl;
+        //     return retCode;
+        // }
     }
+
+    // I2CInterface::RET_CODE retCode = m_i2cInterface.send(regAddress, &payload.front(), payload.size());
+    // if(retCode != I2CInterface::RET_CODE::SUCCESS)
+    // {
+    //     std::cout << "Failed handle write because of error: " << static_cast<int>(retCode) << std::endl;
+    //     return retCode;
+    // }
     return I2CInterface::RET_CODE::SUCCESS;
 }
 
