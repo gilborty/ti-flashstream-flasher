@@ -22,12 +22,13 @@ class FilestreamParser
         std::stringstream m_flashstreamBuffer;
         I2CInterface m_i2cInterface;
 
-        unsigned char getHexFromString(const std::string& stringIn);
-        std::vector<unsigned char> getPayload(std::vector<std::string>& lineIn, int pruneLength);
+        uint8_t getHexFromString(const std::string& stringIn);
+        std::vector<uint8_t> getPayload(std::vector<std::string>& lineIn, int pruneLength);
 
         void handleComment(const std::string& commentIn);
-        void handleCompare(const std::string& compareLine);
         void handleWait(const std::string& waitLine);
+
+        I2CInterface::RET_CODE handleCompare(const std::string& compareLine);
         I2CInterface::RET_CODE handleWrite(const std::string& writeLine);
 
         std::vector<std::string> splitString(const std::string& s, char delim);

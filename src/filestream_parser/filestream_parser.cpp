@@ -46,7 +46,12 @@ I2CInterface::RET_CODE FilestreamParser::flash()
                 }
                 case 'C':
                 {
-                    handleCompare(token);
+                    I2CInterface::RET_CODE retCode = handleCompare(token);
+                    if(retCode != I2CInterface::RET_CODE::SUCCESS)
+                    {
+                        std::cout << "Failed write because of error code: " << static_cast<int>(retCode) << std::endl;
+                        return retCode;
+                    }
                     break;
                 }
                 case 'W':
@@ -134,38 +139,52 @@ void FilestreamParser::handleComment(const std::string& commentIn)
     std::cout << commentIn << std::endl;
 }
 
-void FilestreamParser::handleCompare(const std::string& compareLine)
+I2CInterface::RET_CODE FilestreamParser::handleCompare(const std::string& compareLine)
 {
     //C: i2cAddr RegAddr Byte0 Byte1 Byte2
-    // auto split = splitString(compareLine, ' ');
+    auto split = splitString(compareLine, ' ');
 
-    // //Bit shift the address
-    // unsigned char slaveAddress = (getHexFromString(split[1]) >> 1);
-    // unsigned char regAddress = getHexFromString(split[2]);
+    //get the slave address
+    uint8_t slaveAddress = (getHexFromString(split[1]));
 
-    // auto payload = getPayload(split, 3);
+    //Bit shift left by one
+    slaveAddress = (slaveAddress >> 1);
+    
+    uint8_t regAddress = getHexFromString(split[2]);
 
-    // unsigned char buffer[payload.size()];
+    auto payload = getPayload(split, 3);
 
-    // if(slaveAddress != m_i2cInterface.getAddress())
-    // {
-    //     m_i2cInterface.setAddress(slaveAddress);
-    // }
+    uint8_t buffer[payload.size()];
 
-    // if(m_i2cInterface.receive(regAddress, buffer, payload.size()) < 0)
-    // {
-    //     throw std::runtime_error("Error writing to device");
-    // } 
+    if(slaveAddress != m_i2cInterface.getSlaveAddress())
+    {
+        I2CInterface::RET_CODE retCode = m_i2cInterface.setSlaveAddress(slaveAddress);
+        if(retCode != I2CInterface::RET_CODE::SUCCESS)
+        {
+            std::cout << "Failed to set address in a handle compare. Returned with error code: " << static_cast<int>(retCode) << std::endl;
+            return retCode;
+        }
+    }
 
-    // //Compare
-    // for(size_t i = 0; i < payload.size(); ++i)
-    // {
-    //     std::cout << static_cast<int>(buffer[i]) << "\t" << static_cast<int>(payload.at(i)) << std::endl;
-    //     if(buffer[i] != payload.at(i))
-    //     {
-    //         throw std::runtime_error("Failed compare");
-    //     }
-    // }
+    //Read the bytes
+    I2CInterface::RET_CODE retCode = m_i2cInterface.receive(regAddress, buffer, payload.size());
+    if(retCode != I2CInterface::RET_CODE::SUCCESS)
+    {
+        std::cout << "Failed handle write because of error: " << static_cast<int>(retCode) << std::endl;
+        return retCode;
+    }
+
+    //Compare
+    for(size_t i = 0; i < payload.size(); ++i)
+    {
+        std::cout << static_cast<int>(buffer[i]) << "\t" << static_cast<int>(payload.at(i)) << std::endl;
+        if(buffer[i] != payload.at(i))
+        {
+            throw std::runtime_error("Failed compare");
+        }
+    }
+
+    return I2CInterface::RET_CODE::SUCCESS;
 }
 
 I2CInterface::RET_CODE FilestreamParser::handleWrite(const std::string& writeLine)
@@ -186,7 +205,6 @@ I2CInterface::RET_CODE FilestreamParser::handleWrite(const std::string& writeLin
 
     if(slaveAddress != m_i2cInterface.getSlaveAddress())
     {
-        //TODO: Check the ret val of this 
         I2CInterface::RET_CODE retCode = m_i2cInterface.setSlaveAddress(slaveAddress);
         if(retCode != I2CInterface::RET_CODE::SUCCESS)
         {
