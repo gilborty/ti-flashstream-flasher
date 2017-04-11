@@ -78,6 +78,8 @@ I2CInterface::RET_CODE FilestreamParser::flash()
         return I2CInterface::RET_CODE::FAILED_VALIDATE;
     }
 
+    return I2CInterface::RET_CODE::SUCCESS;
+
 }
 
 bool FilestreamParser::validate()
