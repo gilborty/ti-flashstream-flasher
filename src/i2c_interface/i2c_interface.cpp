@@ -98,12 +98,12 @@ I2CInterface::RET_CODE I2CInterface::send(uint8_t registerAddress, uint8_t* txBu
     return RET_CODE::SUCCESS;
 }
 
-I2CInterface::RET_CODE sendByte(uint8_t registerAddress, uint8_t data)
+I2CInterface::RET_CODE I2CInterface::sendByte(uint8_t registerAddress, uint8_t data)
 {
     uint8_t buffer[2];
     buffer[0] = registerAddress;
     buffer[1] = data;
-    
+
     //Write the data
     if(write(m_fileDescriptor, buffer, length) != length)
     {
