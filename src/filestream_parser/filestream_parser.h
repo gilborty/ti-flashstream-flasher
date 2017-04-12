@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "i2c_interface.h"
+
 class FilestreamParser
 {
     public:

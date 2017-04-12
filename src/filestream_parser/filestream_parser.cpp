@@ -149,10 +149,9 @@ I2CInterface::RET_CODE FilestreamParser::handleCompare(const std::string& compar
     slaveAddress = (slaveAddress >> 1);
     
     uint8_t regAddress = getHexFromString(split[2]);
-
     auto payload = getPayload(split, 3);
 
-    uint8_t buffer[payload.size()];
+    uint8_t readBuffer[payload.size()];
 
     if(slaveAddress != m_i2cInterface.getSlaveAddress())
     {
@@ -165,7 +164,7 @@ I2CInterface::RET_CODE FilestreamParser::handleCompare(const std::string& compar
     }
 
     //Read the bytes
-    I2CInterface::RET_CODE retCode = m_i2cInterface.readFromRegister(regAddress, buffer, payload.size());
+    I2CInterface::RET_CODE retCode = m_i2cInterface.readFromRegister(regAddress, readBuffer, payload.size());
     if(retCode != I2CInterface::RET_CODE::SUCCESS)
     {
         std::cout << "Failed handle write because of error: " << static_cast<int>(retCode) << std::endl;
@@ -175,10 +174,11 @@ I2CInterface::RET_CODE FilestreamParser::handleCompare(const std::string& compar
     //Compare
     for(size_t i = 1; i < payload.size(); ++i)
     {
-        std::cout << "Comparing: " << static_cast<int>(buffer[i]) << "\t" << static_cast<int>(payload.at(i)) << std::endl;
-        if(buffer[i] != payload.at(i))
+        std::cout << "Comparing: " << static_cast<int>(readBuffer[i]) << "\t" << static_cast<int>(payload.at(i)) << std::endl;
+        if(readBuffer[i] != payload.at(i))
         {
-            throw std::runtime_error("Failed compare");
+           std::cout << "Failed compare: {" << static_cast<int>(readBuffer[i]) << " != " << static_cast<int>(payload.at(i)) << "}" << std::endl;
+           std::cout << "Continuing..." << std::endl;
         }
     }
 
@@ -196,7 +196,6 @@ I2CInterface::RET_CODE FilestreamParser::handleWrite(const std::string& writeLin
     slaveAddress = (slaveAddress >> 1);
 
     uint8_t regAddress = getHexFromString(split[2]);
-
     auto payload = getPayload(split, 3);
 
     std::cout << "Writing to device address: " << (int)slaveAddress << " with reg address: " << (int)regAddress << std::endl;
@@ -214,10 +213,7 @@ I2CInterface::RET_CODE FilestreamParser::handleWrite(const std::string& writeLin
     //Iterate throught the payload
     //See Section 1.3: http://www.ti.com/lit/an/slua541a/slua541a.pdf
     for(auto& data : payload)
-    {
-        std::cout << "Reg: " << (int)regAddress << std::endl;
-        std::cout << "Data: " << (int)data << std::endl;
-       
+    {       
         I2CInterface::RET_CODE retCode = m_i2cInterface.sendByte(regAddress, data);
         if(retCode != I2CInterface::RET_CODE::SUCCESS)
         {
