@@ -116,8 +116,15 @@ I2CInterface::RET_CODE I2CInterface::sendByte(uint8_t registerAddress, uint8_t d
 }
 
 
-I2CInterface::RET_CODE I2CInterface::receive(uint8_t registerAddress, uint8_t* rxBuffer, int length)
+I2CInterface::RET_CODE I2CInterface::readFromRegister(uint8_t registerAddress, uint8_t* rxBuffer, int length)
 {
+
+    if(write(m_fileDescriptor, registerAddress, 1) != 1)
+    {
+        std::cout << "i2c error: " << std::strerror(errno) << std::endl;
+        return RET_CODE::FAILED_I2C_WRITE;
+    }
+
     if(read(m_fileDescriptor, rxBuffer, length) != length)
     {
         std::cout << "i2c error: " << std::strerror(errno) << std::endl;

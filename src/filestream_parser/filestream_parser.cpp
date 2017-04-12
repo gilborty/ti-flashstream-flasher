@@ -165,7 +165,7 @@ I2CInterface::RET_CODE FilestreamParser::handleCompare(const std::string& compar
     }
 
     //Read the bytes
-    I2CInterface::RET_CODE retCode = m_i2cInterface.receive(regAddress, buffer, payload.size());
+    I2CInterface::RET_CODE retCode = m_i2cInterface.readFromRegister(regAddress, buffer, payload.size());
     if(retCode != I2CInterface::RET_CODE::SUCCESS)
     {
         std::cout << "Failed handle write because of error: " << static_cast<int>(retCode) << std::endl;

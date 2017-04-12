@@ -39,7 +39,7 @@ class I2CInterface
         I2CInterface::RET_CODE setSlaveAddress(uint8_t slaveAddress);
         uint8_t getSlaveAddress() const;
 
-        I2CInterface::RET_CODE receive(uint8_t registerAddress, uint8_t* rxBuffer, int length);
+        I2CInterface::RET_CODE readFromRegister(uint8_t registerAddress, uint8_t* rxBuffer, int length);
         I2CInterface::RET_CODE send(uint8_t registerAddress, uint8_t* txBuffer, int length);
         I2CInterface::RET_CODE sendByte(uint8_t registerAddress, uint8_t data);
 
